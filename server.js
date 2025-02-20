@@ -7,6 +7,8 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import swaggerJsDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 // Load environment variables
 dotenv.config();
@@ -29,10 +31,29 @@ app.use(cors({
 // Middleware
 app.use(express.json());
 
-// WebSocket Setup
-const io = new Server(server, {
-    cors: { origin: "http://localhost:3000" }  // Ensure WebSockets allow frontend access
-});
+// Swagger Configuration
+const swaggerOptions = {
+    swaggerDefinition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Task Management System API",
+            version: "1.0.0",
+            description: "API documentation for the Task Management System",
+        },
+        servers: [
+            {
+                url: "http://localhost:5000", // Local server
+            },
+            {
+                url: "https://task-management-system-backend-a6xg.onrender.com", // Render server
+            },
+        ],
+    },
+    apis: ["./routes/*.js"], // Path to your API route files
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-doc", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Debugging: Log Routes
 console.log("✅ Loading Routes...");
@@ -43,6 +64,10 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/ai", aiRoutes);
 
 // WebSocket for real-time task updates
+const io = new Server(server, {
+    cors: { origin: "http://localhost:3000" }  // Ensure WebSockets allow frontend access
+});
+
 io.on("connection", (socket) => {
     console.log(`🔗 User connected: ${socket.id}`);
 
