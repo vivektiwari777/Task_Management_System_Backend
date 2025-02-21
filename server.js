@@ -23,7 +23,7 @@ const server = http.createServer(app);
 
 // CORS Configuration
 app.use(cors({
-    origin: "https://task-management-system-backend-l3le.vercel.app/",  // Ensure frontend URL is correct
+    origin: "https://task-management-system-backend-l3le.vercel.app",  // Ensure frontend URL is correct
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
@@ -65,7 +65,7 @@ app.use("/api/ai", aiRoutes);
 
 // WebSocket for real-time task updates
 const io = new Server(server, {
-    cors: { origin: "https://task-management-system-backend-l3le.vercel.app/" }  // Ensure WebSockets allow frontend access
+    cors: { origin: "https://task-management-system-backend-l3le.vercel.app" }  // Ensure WebSockets allow frontend access
 });
 
 io.on("connection", (socket) => {
