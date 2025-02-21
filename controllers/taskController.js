@@ -1,22 +1,19 @@
 import Task from "../models/taskModel.js";
-import { generateTaskBreakdown } from "../utils/geminiHelper.js"; // Ensure this is correctly exported
+import { generateTaskBreakdown } from "../utils/geminiHelper.js";
 
 export const createTask = async (req, res) => {
     try {
         const { title, description } = req.body;
 
-        // Validate input
         if (!title || !description) {
             return res.status(400).json({ message: "Title and description are required" });
         }
 
-        // Generate AI-powered task breakdown
         let breakdown = "";
         if (generateTaskBreakdown) {
             breakdown = await generateTaskBreakdown(title);
         }
 
-        // Create and save task
         const task = new Task({
             title,
             description,
@@ -27,18 +24,22 @@ export const createTask = async (req, res) => {
 
         res.status(201).json({ message: "Task created", task, breakdown });
     } catch (error) {
-        console.error("❌ Error creating task:", error);
+        console.error("Error creating task:", error);
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
 export const getTasks = async (req, res) => {
     try {
-        const tasks = await Task.find({ user: req.user.id });
+        const tasks = await Task.find();
 
-        res.status(200).json(tasks);
+        if (!Array.isArray(tasks)) {
+            return res.status(400).json({ message: "Invalid task data" });
+        }
+
+        res.json(tasks); // ✅ Send array directly instead of `{ tasks }`
     } catch (error) {
-        console.error("❌ Error fetching tasks:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
+        console.error("Error fetching tasks:", error);
+        res.status(500).json({ message: "Server error" });
     }
 };
